@@ -61,7 +61,7 @@ async def delete_files(item_id: int):
     """
     Функция удаляет данные по запросу из базы данных
     и соответствующие файлы изображений из объектного хранилища.
-    :param item_id:
+    :param item_id: номер запроса req
     :return:
     """
     files_list = db_methods.get_file_from_db(item_id)  # получаем из таблицы inbox файлы по номеру запроса
