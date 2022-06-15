@@ -2,6 +2,7 @@ from datetime import datetime
 import unittest
 import os
 
+from starlette import datastructures
 from fastapi import HTTPException
 import minio
 import sqlite3
@@ -172,12 +173,3 @@ class TestCaseMethods(unittest.TestCase):
         client.remove_bucket(test_bucket_name)
 
 
-# class TestApi(unittest.TestCase):
-#     def test_post_api(self):
-#         url = 'http://127.0.0.1:8000/frames/'
-#         file = UploadFile('1.jpg')
-#         file.content_type = 'image/jpeg'
-#         files = [('files', file.file)]
-#         resp = requests.post(url=url, files=files)
-#         print(resp.json())
-#         print(resp)

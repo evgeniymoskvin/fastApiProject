@@ -1,9 +1,9 @@
 import os
 import itertools
-
-from fastapi import HTTPException
 from datetime import datetime
+
 import minio.error
+from fastapi import HTTPException
 
 from settings import client as cl
 
