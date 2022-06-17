@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-data_base = sqlite3.connect('greenatom.sqlite')
+data_base = sqlite3.connect('files.sqlite')
 cursor_db = data_base.cursor()
 
 
