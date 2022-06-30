@@ -29,7 +29,9 @@ async def create_upload_files(files: List[UploadFile]):
     files_dict = {"request_number": number_request}
     number_file = itertools.count(1)  # генератор порядкового номера файла для ключа словаря
     for file in files:
-        file_name = f'{uuid.uuid4()}.jpg'  # генерируем UUID название файла
+        meta_name = file.filename.split('.')[-1]
+        # file_name = f'{uuid.uuid4()}.jpg'  # генерируем UUID название файла
+        file_name = f'{uuid.uuid4()}.{meta_name}'  # файл с тем же разрешением
         contents = await file.read()
         methods.add_files(file_name, contents, number_bucket)  # засылаем файлы в корзину
         db_methods.write_to_db(file_name)  # записываем информацию о загрузке в таблицу inbox
@@ -49,11 +51,19 @@ async def read_files(item_id: int):
     number_file = itertools.count(1)  # генератор порядкового номера файла для ключа словаря
     files_list = db_methods.get_file_from_db(item_id)  # получаем из таблицы inbox файлы по номеру запроса
     files_dict = {"request_number": item_id}
+    if len(files_list) == 0:
+        files_dict["error"] = "Fail request"
     for obj in files_list:
         num_key = f'File number {next(number_file)}'
         files_dict[num_key] = {"file name": obj[0],
                                "date_reg": obj[1]}
     return files_dict
+
+
+@app.get("/bucket/{item_bucket}")
+async def get_bucket_name(item_bucket: int):
+    bucket_name = {"bucket_name": db_methods.get_name_bucket_from_db(item_bucket)[0][0]}
+    return bucket_name
 
 
 @app.delete("/frames/{item_id}")

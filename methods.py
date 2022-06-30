@@ -36,9 +36,10 @@ def check_files(files: list):
     """
     if len(files) > 15 or len(files) == 0:
         raise HTTPException(400, detail="Много файлов")
-    for file in files:
-        if file.content_type != "image/jpeg":
-            raise HTTPException(400, detail="Invalid document type")
+    # Проверка на изображения отключена
+    # for file in files:
+    #     if file.content_type != "image/jpeg":
+    #         raise HTTPException(400, detail="Invalid document type")
 
 
 def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):

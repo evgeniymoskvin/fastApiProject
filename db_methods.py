@@ -59,6 +59,12 @@ def get_file_from_db(req_number: int, c=cursor_db, db=data_base) -> list:
     return items
 
 
+def get_name_bucket_from_db(req_number: int, c=cursor_db, db=data_base):
+    c.execute("""SELECT bucket FROM requests
+                 WHERE id LIKE (?)""", (req_number, ))
+    item = c.fetchall()
+    return item
+
 def delete_req_from_db(req_number: int, c=cursor_db, db=data_base):
     """
     Функция удаляет записи из таблицы
