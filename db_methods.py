@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 from models import GroupSends
-from core import session, session1
+from core import session, session1, session2
 from sqlalchemy import select
 
 data_base = sqlite3.connect('files.sqlite')
@@ -15,6 +15,8 @@ def add_information_about_group_send(number_bucket: str):
         ses.commit()
 
 def get_count (backet_name):
+    stmt = select(GroupSends)
+
     with session1 as ses:
         query = select(GroupSends)
         print(f'query: {query}')
