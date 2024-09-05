@@ -10,9 +10,4 @@ session = sessionmaker(engine)
 session2 = Session(engine)
 session1 = engine.begin()
 
-def create_tables():
-    Base.metadata.create_all(engine)
-    # metadate_obj.drop_all(engine)
-    # metadate_obj.create_all(engine)
-
 

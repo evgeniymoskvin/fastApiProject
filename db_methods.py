@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
-from models import GroupSends
-from core import session, session1, session2
+from models import GroupSends, engine
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 data_base = sqlite3.connect('files.sqlite')
@@ -9,20 +9,35 @@ cursor_db = data_base.cursor()
 
 
 def add_information_about_group_send(number_bucket: str):
-    with session() as ses:
+    with Session(bind=engine) as session:
         new_bucket = GroupSends(bucket_name=number_bucket)
-        ses.add(new_bucket)
-        ses.commit()
+        session.add(new_bucket)
+        session.commit()
 
-def get_count (backet_name):
-    stmt = select(GroupSends)
 
-    with session1 as ses:
-        query = select(GroupSends)
-        print(f'query: {query}')
-        result = ses.execute(query)
-        result_orm = result.all()
-        print(f'result: {result_orm}')
+def get_count(bucket_name):
+    with Session(bind=engine) as session:
+        buckets = session.query(GroupSends).filter_by(bucket_name=bucket_name).first()
+        print(buckets.count_inside_buckets)
+        # for c in buckets:
+        #     print(c)
+        #     print(c.id, c.bucket_name, c.count_inside_buckets)
+
+    # with Session(bind=engine) as session:
+    #     bucket = session.query(GroupSends).filter_by(bucket_name=bucket_name)
+    #     for i in bucket:
+    #         print(i)
+    #     stmt = select(GroupSends)
+
+
+#
+#     with session1 as ses:
+#         query = select(GroupSends)
+#         print(f'query: {query}')
+#         result = ses.execute(query)
+#         result_orm = result.all()
+#         print(f'result: {result_orm}')
+#
 
 def db_requests(number_bucket: str, c=cursor_db, db=data_base):
     """
@@ -80,9 +95,10 @@ def get_file_from_db(req_number: int, c=cursor_db, db=data_base) -> list:
 
 def get_name_bucket_from_db(req_number: int, c=cursor_db, db=data_base):
     c.execute("""SELECT bucket FROM requests
-                 WHERE id LIKE (?)""", (req_number, ))
+                 WHERE id LIKE (?)""", (req_number,))
     item = c.fetchall()
     return item
+
 
 def delete_req_from_db(req_number: int, c=cursor_db, db=data_base):
     """

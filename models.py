@@ -1,10 +1,11 @@
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, func, DateTime
-from  sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import relationship, Mapped, mapped_column, DeclarativeBase
 from sqlalchemy import create_engine
-import datetime
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    pass
+
 
 class GroupSends(Base):
     __tablename__ = 'groupsends'
@@ -23,13 +24,5 @@ class InboxFiles(Base):
     send_number_id: Mapped[int] = mapped_column(ForeignKey("groupsends.id", ondelete="CASCADE"))
 
 
-
-# groupsends = Table(
-#     'groupsends',
-#     metadate_obj,
-#     Column('id', Integer, primary_key=True),
-#     Column('bucket_name', String)
-
-
-# with engine.connect() as conn:
-#     conn.execute('SELECT VER')
+engine = create_engine('sqlite:///test-sqlite3.db')
+# Base.metadata.create_all(engine)

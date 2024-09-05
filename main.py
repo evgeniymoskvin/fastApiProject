@@ -8,14 +8,14 @@ from fastapi.responses import HTMLResponse
 import methods
 import db_methods
 
-from core import create_tables
+
 from db_methods import add_information_about_group_send
 from settings import client as cl
 
 
 app = FastAPI()
 
-create_tables()
+
 
 @app.post("/frames/")
 async def create_upload_files(files: List[UploadFile]):
@@ -115,15 +115,16 @@ async def main():
 @app.get("/test")
 async def test():
     # methods.check_files(files)  # Проверка количества и MIME-типа файлов
-    number_bucket = methods.get_bucket_name()  # получение названия корзины
-    methods.create_bucket(number_bucket)  # создание корзины
+    # number_bucket = methods.get_bucket_name()  # получение названия корзины
+    number_bucket = '2024095'  # получение названия корзины
     check_bucket = cl.bucket_exists(number_bucket)
     if not check_bucket:
         cl.make_bucket(number_bucket)
         print(f'Создана {number_bucket}')
+        methods.create_bucket(number_bucket)  # создание корзины
         add_information_about_group_send(number_bucket)
     else:
-        num_ = db_methods.get_count(number_bucket)
+        db_methods.get_count(number_bucket)
         # print(num_)
         print(f'Уже существует {number_bucket}')
 
