@@ -36,6 +36,8 @@ def check_files(files: list):
     """
     if len(files) > 15 or len(files) == 0:
         raise HTTPException(400, detail="Много файлов")
+    elif len(files) == 0:
+        raise HTTPException(400, detail="Файлы отсутствуют")
     # Проверка на изображения отключена
     # for file in files:
     #     if file.content_type != "image/jpeg":
@@ -54,7 +56,6 @@ def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):
     """
     with open(file_name, 'wb') as f:
         f.write(contents)  # создаем временный файл, для отправки в корзину
-
     client.fput_object(f'{number_bucket}', f"{file_name}", f"{file_name}")
     os.remove(file_name)  # удаляем временный файл
 

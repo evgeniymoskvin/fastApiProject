@@ -1,30 +1,35 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, ForeignKey, Integer, String
-from  sqlalchemy.orm import relationship
+from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, func, DateTime
+from  sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import create_engine
-
-engine = create_engine('sqlite:///test-sqlite3.db')
+import datetime
 
 Base = declarative_base()
-
-Base.metadata.create_all(engine)
 
 class GroupSends(Base):
     __tablename__ = 'groupsends'
 
-    id = Column(Integer, primary_key=True)
-    send_number = Column(Integer, nullable=False)
-    bucket_name = Column(String(250), nullable=False)
-    inbox_file = relationship('InboxFiles', cascade="all,delete")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    bucket_name: Mapped[str]
+    count_inside_buckets: Mapped[int] = mapped_column(default=0)
+    # create_at = Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
 
 class InboxFiles(Base):
     __tablename__ = 'inboxfiles'
 
-    id = Column(Integer, primary_key=True)
-    req_send = Column(Integer, nullable=False)
-    file_name = Column(String(250), nullable=False)
-    send_number_id = Column(Integer, ForeignKey('groupsends.id'))
-    send_number = relationship("GroupSends")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    file_name: Mapped[str]
+    send_number_id: Mapped[int] = mapped_column(ForeignKey("groupsends.id", ondelete="CASCADE"))
+
+
+
+# groupsends = Table(
+#     'groupsends',
+#     metadate_obj,
+#     Column('id', Integer, primary_key=True),
+#     Column('bucket_name', String)
+
 
 # with engine.connect() as conn:
 #     conn.execute('SELECT VER')

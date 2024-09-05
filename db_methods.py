@@ -1,9 +1,23 @@
 import sqlite3
 from datetime import datetime
+from models import GroupSends
+from core import session
+from sqlalchemy import select
 
 data_base = sqlite3.connect('files.sqlite')
 cursor_db = data_base.cursor()
 
+
+def add_information_about_group_send(number_bucket: str):
+    with session() as ses:
+        new_bucket = GroupSends(bucket_name=number_bucket)
+        ses.add(new_bucket)
+        ses.commit()
+
+def get_count (backet_name):
+    with session() as ses:
+        count_num = select(GroupSends)
+        print(count_num)
 
 def db_requests(number_bucket: str, c=cursor_db, db=data_base):
     """
