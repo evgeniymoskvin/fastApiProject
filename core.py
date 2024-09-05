@@ -8,6 +8,7 @@ engine = create_engine('sqlite:///test-sqlite3.db', echo=True)
 
 session = sessionmaker(engine)
 
+session1 = engine.begin()
 def create_tables():
     Base.metadata.create_all(engine)
     # metadate_obj.drop_all(engine)

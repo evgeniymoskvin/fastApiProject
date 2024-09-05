@@ -124,7 +124,7 @@ async def test():
         add_information_about_group_send(number_bucket)
     else:
         num_ = db_methods.get_count(number_bucket)
-        print(num_)
+        # print(num_)
         print(f'Уже существует {number_bucket}')
 
 
