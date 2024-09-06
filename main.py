@@ -67,22 +67,8 @@ async def read_files(item_id: int):
     :param item_id: Код запроса \n
     :return: JSON строка
     """
-    number_file = itertools.count(1)  # генератор порядкового номера файла для ключа словаря
-    files_list = db_methods.get_file_from_db(item_id)  # получаем из таблицы inbox файлы по номеру запроса
-    files_dict = {"request_number": item_id}
-    if len(files_list) == 0:
-        files_dict["error"] = "Fail request"
-    for obj in files_list:
-        num_key = f'File number {next(number_file)}'
-        files_dict[num_key] = {"file name": obj[0],
-                               "date_reg": obj[1]}
-    return files_dict
-
-
-@app.get("/bucket/{item_bucket}")
-async def get_bucket_name(item_bucket: int):
-    bucket_name = {"bucket_name": db_methods.get_name_bucket_from_db(item_bucket)[0][0]}
-    return bucket_name
+    result = db_methods.get_file_list_from_db_alchemy(item_id)  # получаем из таблицы inbox файлы по номеру запроса
+    return result
 
 
 @app.delete("/frames/{item_id}")
@@ -122,19 +108,19 @@ async def main():
     """
     return HTMLResponse(content=content)
 
-@app.get("/test")
-async def test():
-    # methods.check_files(files)  # Проверка количества файлов
-    number_bucket = methods.get_bucket_name()  # получение названия корзины
-    # number_bucket = '2024095'  # получение названия корзины
-    check_bucket = cl.bucket_exists(number_bucket)
-    if not check_bucket:
-        cl.make_bucket(number_bucket)
-        print(f'Создана {number_bucket}')
-        methods.create_bucket(number_bucket)  # создание корзины
-        add_information_about_group_send_alchemy(number_bucket)
-    bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
-    print(f'bucket_id: {bucket_id}')
-    req_id = db_methods.create_request_number_alchemy(bucket_id)
-    print(f'req_id: {req_id}')
-    return HTMLResponse(status_code=200)
+# @app.get("/test")
+# async def test():
+#     # methods.check_files(files)  # Проверка количества файлов
+#     number_bucket = methods.get_bucket_name()  # получение названия корзины
+#     # number_bucket = '2024095'  # получение названия корзины
+#     check_bucket = cl.bucket_exists(number_bucket)
+#     if not check_bucket:
+#         cl.make_bucket(number_bucket)
+#         print(f'Создана {number_bucket}')
+#         methods.create_bucket(number_bucket)  # создание корзины
+#         add_information_about_group_send_alchemy(number_bucket)
+#     bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
+#     print(f'bucket_id: {bucket_id}')
+#     req_id = db_methods.create_request_number_alchemy(bucket_id)
+#     print(f'req_id: {req_id}')
+#     return HTMLResponse(status_code=200)

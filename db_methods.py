@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 from models import GroupSends, engine, RequestsNames, InboxFiles
 from sqlalchemy.orm import Session
+import itertools
 from sqlalchemy import select
 
 data_base = sqlite3.connect('files.sqlite')
@@ -43,6 +44,21 @@ def create_info_about_file_to_db_alchemy(request_number, file_name):
     except Exception as e:
         print(e)
         return False
+
+def get_file_list_from_db_alchemy(req_id):
+    files = session.query(InboxFiles).filter_by(send_number_id=req_id)
+    bucket_id = session.query(RequestsNames).get(req_id).bucket_id
+    bucket_name = session.query(GroupSends).get(bucket_id).bucket_name
+
+    result = {'bucket_id': bucket_id,
+              'bucket_name': bucket_name}
+    files_dict = {}
+    num = itertools.count(1, 1)
+    for file in files:
+        files_dict[next(num)] = file.file_name
+        print(file.file_name)
+    result['files'] = files_dict
+    return result
 
 
 def db_requests(number_bucket: str, c=cursor_db, db=data_base):

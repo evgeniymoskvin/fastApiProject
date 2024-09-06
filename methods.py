@@ -38,10 +38,7 @@ def check_files(files: list):
         raise HTTPException(400, detail="Много файлов")
     elif len(files) == 0:
         raise HTTPException(400, detail="Файлы отсутствуют")
-    # Проверка на изображения отключена
-    # for file in files:
-    #     if file.content_type != "image/jpeg":
-    #         raise HTTPException(400, detail="Invalid document type")
+
 
 
 def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):
