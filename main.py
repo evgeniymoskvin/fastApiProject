@@ -9,7 +9,7 @@ import methods
 import db_methods
 
 
-from db_methods import add_information_about_group_send
+from db_methods import add_information_about_group_send_alchemy, update_count_of_buckets
 from settings import client as cl
 
 
@@ -29,23 +29,33 @@ async def create_upload_files(files: List[UploadFile]):
     """
     methods.check_files(files)  # Проверка количества и MIME-типа файлов
     number_bucket = methods.get_bucket_name()  # получение названия корзины
-    methods.create_bucket(number_bucket)  # создание корзины
-    print(number_bucket)
-    # db_methods.db_requests(number_bucket)  # запись в таблицу requests номера запроса и имя корзины
-    # number_request = db_methods.get_db_requests()  # Получение номера запроса из базы данных requests
-    # files_dict = {"request_number": number_request}
-    # number_file = itertools.count(1)  # генератор порядкового номера файла для ключа словаря
-    # for file in files:
-    #     meta_name = file.filename.split('.')[-1]
+    print(f'Номер корзины: {number_bucket}')
+    check_bucket = cl.bucket_exists(number_bucket)
+    if not check_bucket:
+        cl.make_bucket(number_bucket)
+        print(f'Создана {number_bucket}')
+        methods.create_bucket(number_bucket)  # создание корзины
+        add_information_about_group_send_alchemy(number_bucket)
+    bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
+    print(f'bucket_id: {bucket_id}')
+    req_id = db_methods.create_request_number_alchemy(bucket_id)
+    print(f'req_id: {req_id}')
+    files_dict = {"bucket_id": bucket_id,
+                  "bucket_name": number_bucket,
+                  "req_id": req_id}
+    number_file = itertools.count(1)  # генератор порядкового номера файла для ключа словаря
+    for file in files:
+        meta_name = file.filename.split('.')[-1]
     #     # file_name = f'{uuid.uuid4()}.jpg'  # генерируем UUID название файла
-    #     file_name = f'{uuid.uuid4()}.{meta_name}'  # файл с тем же разрешением
-    #     contents = await file.read()
-    #     methods.add_files(file_name, contents, number_bucket)  # засылаем файлы в корзину
-    #     db_methods.write_to_db(file_name)  # записываем информацию о загрузке в таблицу inbox
-    #     num_key = f'File number {next(number_file)}'
-    #     files_dict[num_key] = file_name
-    # return files_dict
-    return number_bucket
+        file_name = f'{uuid.uuid4()}.{meta_name}'  # файл с тем же разрешением
+        contents = await file.read()
+        methods.add_files(file_name, contents, number_bucket)  # засылаем файлы в корзину
+        if db_methods.create_info_about_file_to_db_alchemy(request_number=req_id, file_name=file_name):
+        # записываем информацию о загрузке в таблицу inboxfiles
+            num_key = f'File number {next(number_file)}'
+            files_dict[num_key] = file_name
+    return files_dict
+    # return number_bucket
 
 
 
@@ -114,19 +124,17 @@ async def main():
 
 @app.get("/test")
 async def test():
-    # methods.check_files(files)  # Проверка количества и MIME-типа файлов
-    # number_bucket = methods.get_bucket_name()  # получение названия корзины
-    number_bucket = '2024095'  # получение названия корзины
+    # methods.check_files(files)  # Проверка количества файлов
+    number_bucket = methods.get_bucket_name()  # получение названия корзины
+    # number_bucket = '2024095'  # получение названия корзины
     check_bucket = cl.bucket_exists(number_bucket)
     if not check_bucket:
         cl.make_bucket(number_bucket)
         print(f'Создана {number_bucket}')
         methods.create_bucket(number_bucket)  # создание корзины
-        add_information_about_group_send(number_bucket)
-    else:
-        db_methods.get_count(number_bucket)
-        # print(num_)
-        print(f'Уже существует {number_bucket}')
-
-
+        add_information_about_group_send_alchemy(number_bucket)
+    bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
+    print(f'bucket_id: {bucket_id}')
+    req_id = db_methods.create_request_number_alchemy(bucket_id)
+    print(f'req_id: {req_id}')
     return HTMLResponse(status_code=200)

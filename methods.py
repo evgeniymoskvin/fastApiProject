@@ -13,8 +13,8 @@ def get_bucket_name() -> str:
     Функция с помощью datetime генерирует название корзины для min.io
     :return: Строка с названием корзины
     """
-    today = datetime.now()
-    return f'{today.year}{today.month:02}{today.day}'
+    today = datetime.today()
+    return f'{today.year}{str(today.month).rjust(2, "0")}{str(today.day).rjust(2, "0")}'
 
 
 def create_bucket(found: str, client=cl):
