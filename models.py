@@ -22,6 +22,8 @@ class RequestsNames(Base):
     bucket_id: Mapped[int] = mapped_column(ForeignKey("groupsends.id", ondelete="CASCADE"))
 
 
+
+
 class InboxFiles(Base):
     __tablename__ = 'inboxfiles'
 

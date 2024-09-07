@@ -79,17 +79,24 @@ async def delete_files(item_id: int):
     :param item_id: номер запроса req
     :return:
     """
-    files_list = db_methods.get_file_from_db(item_id)  # получаем из таблицы inbox файлы по номеру запроса
-    del_files = methods.delete_files_from_bucket(files_list)  # удаляем из корзины файлы
-    files_dict = {"delete_request_number": item_id}
-    if len(files_list) != 0:
-        db_methods.delete_req_from_db(item_id)  # удаляем файлы из базы данных
-        files_dict['delete_status'] = f'{HTTPException(200)}'
-        files_dict['detail'] = "Ok"
-    else:
-        return HTTPException(404, detail="Not found in DB")  # при отсутствии записей в базе данных
-    files_dict['files'] = del_files
-    return files_dict
+    files_list = db_methods.get_file_list_from_db_alchemy(item_id)  # получаем из таблицы inbox файлы по номеру запроса
+    print(files_list)
+    del_files_bucket = methods.delete_files_from_bucket(files_list)  # удаляем из корзины файлы
+    del_files_db = db_methods.delete_file_list_from_db_alchemy(item_id)
+    result_dict = {
+        # 'files': del_files_bucket,
+        # 'db': del_files_db
+        'key': 'удалены'
+    }
+    # files_dict = {"delete_request_number": item_id}
+    # if len(files_list) != 0:
+    #     db_methods.delete_req_from_db(item_id)  # удаляем файлы из базы данных
+    #     files_dict['delete_status'] = f'{HTTPException(200)}'
+    #     files_dict['detail'] = "Ok"
+    # else:
+    #     return HTTPException(404, detail="Not found in DB")  # при отсутствии записей в базе данных
+    # files_dict['files'] = del_files
+    return result_dict
 
 
 @app.get("/")

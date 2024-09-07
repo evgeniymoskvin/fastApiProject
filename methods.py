@@ -40,7 +40,6 @@ def check_files(files: list):
         raise HTTPException(400, detail="Файлы отсутствуют")
 
 
-
 def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):
     """
     Функция создает временный файл для отправки его в корзину min.io
@@ -57,26 +56,38 @@ def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):
     os.remove(file_name)  # удаляем временный файл
 
 
-def delete_files_from_bucket(files_list: list, client=cl) -> dict:
+def delete_files_from_bucket(files_dict: dict, client=cl) -> dict:
     """
     Функция удаляет файлы из корзины
     :param client: client min.io
-    :param files_list: список кортежей из базы данных с информацией о файлах
+    :param files_dict: словарь с информацией об удалении
     :return: словарь с результатами работы функции.
     """
     number_file = itertools.count(1)
-    files_dict = {}  # словарь с удаленными файлами
-    for obj in files_list:
-        number_bucket = obj[2]  # название корзины из таблицы
-        date_reg = obj[1]  # дата регистрации файла из таблицы
-        file_name = obj[0]  # название файла из таблицы
-        num_key = f'File number {next(number_file)}'
-        if client.bucket_exists(number_bucket):  # проверяем существование корзины
+    result_dict = {}  # словарь с удаленными файлами
+    result_dict['bucket_id'] = files_dict['bucket_id']
+    result_dict['bucket_name'] = files_dict['bucket_name']
+    for key, file_name in files_dict['files'].items():
+        if client.bucket_exists(files_dict['bucket_name']):  # проверяем существование корзины
             try:  # Отлавливаем ошибку, если файл был удален из корзины, но остался в бд
-                client.get_object(number_bucket, file_name)
-                client.remove_object(number_bucket, file_name)
-                files_dict[num_key] = {"file name": file_name,
-                                       "date_reg": date_reg}
+                client.get_object(files_dict['bucket_name'], file_name)
+                client.remove_object(files_dict['bucket_name'], file_name)
+                result_dict[number_file] = {"file name": file_name}
             except minio.error.S3Error:
-                files_dict[num_key] = {"errors": f"Файл {file_name} не найден в хранилище"}
-    return files_dict
+                result_dict[number_file] = {"errors": f"Файл {file_name} не найден в хранилище"}
+        else:
+            result_dict['error'] = {f'Bucket not found'}
+    # for obj in files_list:
+    #     number_bucket = obj[2]  # название корзины из таблицы
+    #     date_reg = obj[1]  # дата регистрации файла из таблицы
+    #     file_name = obj[0]  # название файла из таблицы
+    #     num_key = f'File number {next(number_file)}'
+    #     if client.bucket_exists(number_bucket):  # проверяем существование корзины
+    #         try:  # Отлавливаем ошибку, если файл был удален из корзины, но остался в бд
+    #             client.get_object(number_bucket, file_name)
+    #             client.remove_object(number_bucket, file_name)
+    #             files_dict[num_key] = {"file name": file_name,
+    #                                    "date_reg": date_reg}
+    #         except minio.error.S3Error:
+    #             files_dict[num_key] = {"errors": f"Файл {file_name} не найден в хранилище"}
+    return result_dict

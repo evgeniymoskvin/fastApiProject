@@ -17,7 +17,7 @@ def add_information_about_group_send_alchemy(number_bucket: str):
 
 
 def get_bucket_info_alchemy(bucket_name):
-    bucket = session.query(GroupSends).filter_by(bucket_name=bucket_name).first()
+    bucket = session.query(GroupSends).filter_by(bucket_name=bucket_name).one()
     print(f'bucket.id: {bucket.id}; bucket_name={bucket.bucket_name}')
     return bucket.id
 
@@ -27,6 +27,7 @@ def update_count_of_buckets(bucket_id):
     bucket.count_inside_buckets += 1
     session.commit()
     return bucket.count_inside_buckets
+
 
 def create_request_number_alchemy(bucket_id):
     new_request = RequestsNames(bucket_id=bucket_id)
@@ -45,13 +46,15 @@ def create_info_about_file_to_db_alchemy(request_number, file_name):
         print(e)
         return False
 
+
 def get_file_list_from_db_alchemy(req_id):
     files = session.query(InboxFiles).filter_by(send_number_id=req_id)
     bucket_id = session.query(RequestsNames).get(req_id).bucket_id
     bucket_name = session.query(GroupSends).get(bucket_id).bucket_name
 
     result = {'bucket_id': bucket_id,
-              'bucket_name': bucket_name}
+              'bucket_name': bucket_name,
+              'req_id': req_id}
     files_dict = {}
     num = itertools.count(1, 1)
     for file in files:
@@ -59,6 +62,22 @@ def get_file_list_from_db_alchemy(req_id):
         print(file.file_name)
     result['files'] = files_dict
     return result
+
+
+def delete_file_list_from_db_alchemy(req_id):
+    print('Удаление из бд')
+    request_for_del = session.query(RequestsNames).get(req_id)
+    files = session.query(InboxFiles).filter_by(send_number_id=req_id)
+    files.delete()
+    session.delete(request_for_del)
+    session.commit()
+    try:
+        files.delete()
+        session.delete(request_for_del)
+        session.commit()
+        return f'Файлы удалены из базы данных'
+    except Exception as e:
+        return e
 
 
 def db_requests(number_bucket: str, c=cursor_db, db=data_base):
