@@ -1,12 +1,8 @@
 import sqlite3
-from datetime import datetime
 from models import GroupSends, engine, RequestsNames, InboxFiles
 from sqlalchemy.orm import Session
 import itertools
-from sqlalchemy import select
 
-data_base = sqlite3.connect('files.sqlite')
-cursor_db = data_base.cursor()
 session = Session(bind=engine)
 
 
