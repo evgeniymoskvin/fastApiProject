@@ -15,19 +15,15 @@ app = FastAPI()
 
 
 @app.post("/frames/")
-async def create_upload_files(files: List[UploadFile]):
+async def create_upload_files(files: List[UploadFile]) -> dict:
     """
-    Функция сохраняет переданные файлы в корзину с именем <дата в формате YYYYMMDD>
-    объектного хранилища min.io с именами <UUID>.jpg
-    и фиксирует в базе данных в таблице inbox со структурой:
-    <код запроса> | <имя сохраненного файла> | <дата / время регистрации> \n
-    :param files: полученные файлы \n
-    :return: возвращает перечень созданных элементов в формате JSON
+    Сохраняем переданные файлы в корзину min.io с именем <дата в формате YYYYMMDD>
+    объектного хранилища min.io с именами <UUID>.***
+    и фиксирует в базе данных в таблице inboxfiles и requests_number:
     """
-    methods.check_files(files)  # Проверка количества и MIME-типа файлов
     number_bucket = methods.get_bucket_name()  # получение названия корзины
     print(f'Номер корзины: {number_bucket}')
-    check_bucket = cl.bucket_exists(number_bucket)
+    check_bucket = cl.bucket_exists(number_bucket)  # Проверяем есть ли корзина
     if not check_bucket:
         cl.make_bucket(number_bucket)
         print(f'Создана {number_bucket}')
@@ -56,15 +52,13 @@ async def create_upload_files(files: List[UploadFile]):
 
 
 @app.get("/frames/{item_id}")
-async def read_files(item_id: int):
+async def read_files(item_id: int) -> dict:
     """
-    На вход подается код запроса. На выходе возвращается список соответствующих коду запроса изображений
-    в формате JSON, включая дату и время регистрации и имена файлов.\n
-    :param item_id: Код запроса \n
-    :return: JSON строка
+    Получение списка файлов по номеру отправки
     """
     result = db_methods.get_file_list_from_db_alchemy(item_id)  # получаем из таблицы inbox файлы по номеру запроса
     return result
+
 
 @app.get("/buckets")
 async def get_buckets_list():
@@ -83,12 +77,10 @@ async def get_buckets_list():
 
 
 @app.delete("/frames/{item_id}")
-async def delete_files(item_id: int):
+async def delete_files(item_id: int) -> dict:
     """
-    Функция удаляет данные по запросу из базы данных
-    и соответствующие файлы изображений из объектного хранилища.
-    :param item_id: номер запроса req
-    :return:
+    Удаление данных из базы данных
+    и соответствующих файлов из min.io.
     """
     files_list = db_methods.get_file_list_from_db_alchemy(item_id)  # получаем из таблицы inbox файлы по номеру запроса
     del_files_bucket = methods.delete_files_from_bucket(files_list)  # удаляем из корзины файлы
@@ -99,37 +91,3 @@ async def delete_files(item_id: int):
         'db': del_files_db,
     }
     return result_dict
-
-
-# @app.get("/")
-# async def main():
-#     content = """
-#     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-#     <body>
-#         <div class="container text-center">
-#         <h2 class="m-3">Загрузите файлы</h2>
-#             <form action="/frames/" enctype="multipart/form-data" method="post">
-#               <input name="files" type="file" class="form-control" id="inputGroupFile01" multiple> <br>
-#               <input class="btn btn-outline-secondary" type="submit">
-#             </form>
-#         </div>
-#     </body>
-#     """
-#     return HTMLResponse(content=content)
-
-# @app.get("/test")
-# async def test():
-#     # methods.check_files(files)  # Проверка количества файлов
-#     number_bucket = methods.get_bucket_name()  # получение названия корзины
-#     # number_bucket = '2024095'  # получение названия корзины
-#     check_bucket = cl.bucket_exists(number_bucket)
-#     if not check_bucket:
-#         cl.make_bucket(number_bucket)
-#         print(f'Создана {number_bucket}')
-#         methods.create_bucket(number_bucket)  # создание корзины
-#         add_information_about_group_send_alchemy(number_bucket)
-#     bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
-#     print(f'bucket_id: {bucket_id}')
-#     req_id = db_methods.create_request_number_alchemy(bucket_id)
-#     print(f'req_id: {req_id}')
-#     return HTMLResponse(status_code=200)

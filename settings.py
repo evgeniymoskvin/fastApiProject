@@ -2,9 +2,8 @@ from minio import Minio
 
 """
 Данные для отправки данных на min.io
-Надо вынести в переменную окружения, 
-Оставлена здесь, для проверки
 """
+
 client = Minio(
     "45.132.18.6:9000",
     access_key="uVwUzCeMtpXECCEJBTyT",
