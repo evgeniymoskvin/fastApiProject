@@ -12,8 +12,10 @@ class GroupSends(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     bucket_name: Mapped[str]
-    # count_inside_buckets: Mapped[int] = mapped_column(default=0)
-    # create_at = Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    # relationships
+    request_numbers = relationship('RequestsNames', backref='group_send', cascade='all, delete')
+
 
 class RequestsNames(Base):
     __tablename__ = 'requests_number'
@@ -21,7 +23,8 @@ class RequestsNames(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     bucket_id: Mapped[int] = mapped_column(ForeignKey("groupsends.id", ondelete="CASCADE"))
 
-
+    # relationships
+    inbox_files = relationship('InboxFiles', backref='requests_number', cascade='all, delete')
 
 
 class InboxFiles(Base):

@@ -8,6 +8,9 @@ from fastapi import HTTPException
 from settings import client as cl
 
 
+def get_all_buckets_list():
+    return cl.list_buckets()
+
 def get_bucket_name() -> str:
     """
     Функция с помощью datetime генерирует название корзины для min.io
@@ -64,17 +67,19 @@ def delete_files_from_bucket(files_dict: dict, client=cl) -> dict:
     :return: словарь с результатами работы функции.
     """
     number_file = itertools.count(1)
-    result_dict = {}  # словарь с удаленными файлами
-    result_dict['bucket_id'] = files_dict['bucket_id']
-    result_dict['bucket_name'] = files_dict['bucket_name']
+    # result_dict = {}  # словарь с удаленными файлами
+    result_dict = {
+        'bucket_id': files_dict['bucket_id'],
+        'bucket_name': files_dict['bucket_name']
+    }
     for key, file_name in files_dict['files'].items():
         if client.bucket_exists(files_dict['bucket_name']):  # проверяем существование корзины
             try:  # Отлавливаем ошибку, если файл был удален из корзины, но остался в бд
                 client.get_object(files_dict['bucket_name'], file_name)
                 client.remove_object(files_dict['bucket_name'], file_name)
-                result_dict[number_file] = {"file name": file_name}
+                result_dict[next(number_file)] = file_name
             except minio.error.S3Error:
-                result_dict[number_file] = {"errors": f"Файл {file_name} не найден в хранилище"}
+                result_dict[next(number_file)] = {"errors": f"Файл {file_name} не найден в хранилище"}
         else:
             result_dict['error'] = {f'Bucket not found'}
     # for obj in files_list:
