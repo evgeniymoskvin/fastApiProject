@@ -1,4 +1,5 @@
 from sqlalchemy import ForeignKey, create_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -35,4 +36,6 @@ class InboxFiles(Base):
 
 
 engine = create_engine('sqlite:///test-sqlite3.db')
+engine_async = create_async_engine('sqlite+aiosqlite:///test-sqlite3.db')
+
 # Base.metadata.create_all(engine)

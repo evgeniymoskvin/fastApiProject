@@ -1,10 +1,12 @@
 import itertools
 import logging
 
-from models import GroupSends, InboxFiles, RequestsNames, engine
+from models import GroupSends, InboxFiles, RequestsNames, engine, engine_async
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 session = Session(bind=engine)
+session_async = AsyncSession(bind=engine_async)
 logging.basicConfig(level=logging.INFO, filename="py_log.log", filemode="w")
 
 
