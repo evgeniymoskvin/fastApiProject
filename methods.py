@@ -1,9 +1,8 @@
-import os
 import itertools
+import os
 from datetime import datetime
 
 import minio.error
-
 from settings import client as cl
 
 
@@ -16,7 +15,11 @@ def get_bucket_name() -> str:
     Генерация название корзины для min.io
     """
     today = datetime.today()
-    return f'{today.year}{str(today.month).rjust(2, "0")}{str(today.day).rjust(2, "0")}'
+    return (
+        f"{today.year}"
+        f'{str(today.month).rjust(2, "0")}'
+        f'{str(today.day).rjust(2, "0")}'
+    )
 
 
 def create_bucket(found: str, client=cl):
@@ -33,9 +36,9 @@ def add_files(file_name: str, contents: bytes, number_bucket: str, client=cl):
     """
     Добавление файла в min.io
     """
-    with open(file_name, 'wb') as f:
+    with open(file_name, "wb") as f:
         f.write(contents)  # создаем временный файл, для отправки в корзину
-    client.fput_object(f'{number_bucket}', f"{file_name}", f"{file_name}")
+    client.fput_object(f"{number_bucket}", f"{file_name}", f"{file_name}")
     os.remove(file_name)  # удаляем временный файл
 
 
@@ -45,17 +48,20 @@ def delete_files_from_bucket(files_dict: dict, client=cl) -> dict:
     """
     number_file = itertools.count(1)
     result_dict = {
-        'bucket_id': files_dict['bucket_id'],
-        'bucket_name': files_dict['bucket_name']
+        "bucket_id": files_dict["bucket_id"],
+        "bucket_name": files_dict["bucket_name"],
     }
-    for key, file_name in files_dict['files'].items():
-        if client.bucket_exists(files_dict['bucket_name']):  # проверяем существование корзины
+    for key, file_name in files_dict["files"].items():
+        # проверяем существование корзины
+        if client.bucket_exists(files_dict["bucket_name"]):
             try:  # Если файл был удален из корзины, но остался в бд
-                client.get_object(files_dict['bucket_name'], file_name)
-                client.remove_object(files_dict['bucket_name'], file_name)
+                client.get_object(files_dict["bucket_name"], file_name)
+                client.remove_object(files_dict["bucket_name"], file_name)
                 result_dict[next(number_file)] = file_name
             except minio.error.S3Error:
-                result_dict[next(number_file)] = {"errors": f"Файл {file_name} не найден в хранилище"}
+                result_dict[next(number_file)] = {
+                    "errors": f"Файл {file_name} не найден в хранилище"
+                }
         else:
-            result_dict['error'] = {f'Bucket not found'}
+            result_dict["error"] = "Bucket not found"
     return result_dict

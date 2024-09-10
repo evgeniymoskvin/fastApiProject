@@ -1,6 +1,5 @@
-from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, func, DateTime
-from sqlalchemy.orm import relationship, Mapped, mapped_column, DeclarativeBase
-from sqlalchemy import create_engine
+from sqlalchemy import ForeignKey, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):

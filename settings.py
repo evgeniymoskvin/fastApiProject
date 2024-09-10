@@ -1,5 +1,9 @@
 from minio import Minio
 
+
+#Логирование в файл
+
+
 """
 Данные для отправки данных на min.io
 """
@@ -10,4 +14,3 @@ client = Minio(
     secret_key="JKjqTqm3nXeK6VwQLmV8lEx3Xnmgt0wn5z4lFi9K",
     secure=False
 )
-
