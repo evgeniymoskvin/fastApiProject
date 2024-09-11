@@ -32,6 +32,7 @@ class RequestsNames(Base):
     # def __str__(self):
     #     return f'{self.__class__.__name__} | req_id = {self.id} : {self.bucket_id}'
 
+
 class InboxFiles(Base):
     __tablename__ = 'inboxfiles'
 

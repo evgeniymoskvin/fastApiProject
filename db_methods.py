@@ -45,7 +45,9 @@ async def create_request_number_alchemy(bucket_id: int) -> int:
     return new_request.id
 
 
-async def create_info_about_file_to_db_alchemy(request_number: int, file_name: str) -> bool:
+async def create_info_about_file_to_db_alchemy(
+    request_number: int, file_name: str
+) -> bool:
     """Запись информации в бд о загруженных файлах"""
     try:
         new_file = InboxFiles(file_name=file_name, send_number_id=request_number)

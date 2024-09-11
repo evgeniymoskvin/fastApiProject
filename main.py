@@ -9,7 +9,7 @@ from fastapi import FastAPI, UploadFile
 from settings import client as cl
 
 app = FastAPI()
-logging.basicConfig(level=logging.INFO, filename='py_log.log', filemode='w')
+logging.basicConfig(level=logging.INFO, filename="py_log.log", filemode="w")
 
 
 @app.post("/frames/")
@@ -40,7 +40,8 @@ async def create_upload_files(files: List[UploadFile]) -> dict:
         # засылаем файлы в корзину
         methods.add_files(file_name, contents, number_bucket)
         if await db_methods.create_info_about_file_to_db_alchemy(
-                request_number=req_id, file_name=file_name):
+            request_number=req_id, file_name=file_name
+        ):
             # записываем информацию о загрузке в таблицу InboxFiles
             num_key = f"File number {next(number_file)}"
             files_dict[num_key] = file_name
