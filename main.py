@@ -27,9 +27,9 @@ async def create_upload_files(files: List[UploadFile]) -> dict:
         cl.make_bucket(number_bucket)
         logging.info(f"Создана корзина: {number_bucket}")
         methods.create_bucket(number_bucket)  # создание корзины
-        db_methods.add_information_about_group_send_alchemy(number_bucket)
-    bucket_id = db_methods.get_bucket_info_alchemy(number_bucket)
-    req_id = db_methods.create_request_number_alchemy(bucket_id)
+        await db_methods.add_information_about_group_send_alchemy(number_bucket)
+    bucket_id = await db_methods.get_bucket_info_alchemy(number_bucket)
+    req_id = await db_methods.create_request_number_alchemy(bucket_id)
     files_dict = {"bucket_id": bucket_id, "bucket_name": number_bucket, "req_id": req_id}
     # генератор порядкового номера файла для ключа словаря
     number_file = itertools.count(1)
@@ -39,13 +39,12 @@ async def create_upload_files(files: List[UploadFile]) -> dict:
         contents = await file.read()
         # засылаем файлы в корзину
         methods.add_files(file_name, contents, number_bucket)
-        if db_methods.create_info_about_file_to_db_alchemy(
+        if await db_methods.create_info_about_file_to_db_alchemy(
                 request_number=req_id, file_name=file_name):
             # записываем информацию о загрузке в таблицу InboxFiles
             num_key = f"File number {next(number_file)}"
             files_dict[num_key] = file_name
     return files_dict
-    # return number_bucket
 
 
 @app.get("/frames/{item_id}")
@@ -54,7 +53,7 @@ async def read_files(item_id: int) -> dict:
     Получение списка файлов по номеру отправки
     """
     # получаем из таблицы inbox файлы по номеру запроса
-    result = db_methods.get_file_list_from_db_alchemy(item_id)
+    result = await db_methods.get_file_list_from_db_alchemy(item_id)
     return result
 
 
@@ -79,10 +78,10 @@ async def delete_files(item_id: int) -> dict:
     и соответствующих файлов из min.io.
     """
     # получаем из таблицы inbox файлы по номеру запроса
-    files_list = db_methods.get_file_list_from_db_alchemy(item_id)
+    files_list = await db_methods.get_file_list_from_db_alchemy(item_id)
     # удаляем из корзины файлы
     del_files_bucket = methods.delete_files_from_bucket(files_list)
-    del_files_db = db_methods.delete_file_list_from_db_alchemy(item_id)
+    del_files_db = await db_methods.delete_file_list_from_db_alchemy(item_id)
     result_dict = {
         "files": del_files_bucket,
         "db": del_files_db,

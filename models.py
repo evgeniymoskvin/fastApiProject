@@ -16,6 +16,9 @@ class GroupSends(Base):
     # relationships
     request_numbers = relationship('RequestsNames', backref='group_send', cascade='all, delete')
 
+    def __str__(self):
+        return f'{self.__class__.__name__} | bucket_name = {self.bucket_name}'
+
 
 class RequestsNames(Base):
     __tablename__ = 'requests_number'
@@ -26,6 +29,8 @@ class RequestsNames(Base):
     # relationships
     inbox_files = relationship('InboxFiles', backref='requests_number', cascade='all, delete')
 
+    # def __str__(self):
+    #     return f'{self.__class__.__name__} | req_id = {self.id} : {self.bucket_id}'
 
 class InboxFiles(Base):
     __tablename__ = 'inboxfiles'
